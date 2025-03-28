@@ -1,0 +1,39 @@
+# k8s/mysql-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mx-bank-currency-exchange-mysql
+  namespace: mx-bank
+spec:
+  selector:
+    matchLabels:
+      app: mx-bank-currency-exchange-mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mx-bank-currency-exchange-mysql
+    spec:
+      containers:
+        - image: mysql:8.0
+          name: mx-bank-currency-exchange-mysql
+          env:
+            - name: MYSQL_DATABASE
+              value: mx_bank_currency_exchange_db
+            - name: MYSQL_USER
+              value: user
+            - name: MYSQL_PASSWORD
+              value: pass
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mx-bank-currency-exchange-mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mx-bank-currency-exchange-mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mx-bank-currency-exchange-mysql-pv-claim

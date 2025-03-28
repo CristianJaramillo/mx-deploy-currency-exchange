@@ -1,0 +1,31 @@
+# k8s/mx-bank-wkr-currency-exchange-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mx-bank-wkr-currency-exchange
+  namespace: mx-bank
+  labels:
+    app: mx-bank-wkr-currency-exchange
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mx-bank-wkr-currency-exchange
+  template:
+    metadata:
+      labels:
+        app: mx-bank-wkr-currency-exchange
+    spec:
+      containers:
+        - name: mx-bank-wkr-currency-exchange
+          image: mx-bank-wkr-currency-exchange:1.0.0
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/app/config/mx-bank-wkr-currency-exchange.properties
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: mx-bank-wkr-currency-exchange-config

@@ -1,0 +1,35 @@
+# k8s/mx-bank-wkr-currency-exchange-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mx-bank-wkr-currency-exchange-config
+  namespace: mx-bank
+data:
+  mx-bank-wkr-currency-exchange.properties: |
+    spring.application.name=Worker Currency Exchange
+
+    # Datasource - MySQL
+    spring.datasource.url=jdbc:mysql://mx-bank-currency-exchange-mysql:3306/mx_bank_currency_exchange_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+    spring.datasource.username=user
+    spring.datasource.password=pass
+
+    # JPA / Hibernate
+    spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+
+    # RabbitMQ
+    spring.rabbitmq.host=mx-bank-currency-exchange-rabbitmq
+    spring.rabbitmq.port=5672
+    spring.rabbitmq.username=guest
+    spring.rabbitmq.password=guest
+    spring.rabbitmq.queue=currency.exchange.transaction
+
+    spring.rabbitmq.listener.simple.retry.enabled=true
+    spring.rabbitmq.listener.simple.retry.max-attempts=10
+    spring.rabbitmq.listener.simple.retry.initial-interval=5000
+    spring.rabbitmq.listener.simple.retry.multiplier=2.0
+    spring.rabbitmq.listener.simple.retry.max-interval=60000
+
