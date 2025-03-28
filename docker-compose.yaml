@@ -1,0 +1,68 @@
+services:
+  mx-bank-currency-exchange-mysql:
+    image: mysql:8.0
+    container_name: mx-bank-currency-exchange-mysql
+    env_file:
+      - ./config/mysql.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - currency-exchange-net
+
+  mx-bank-currency-exchange-rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: mx-bank-currency-exchange-rabbitmq
+    env_file:
+      - ./config/rabbitmq.env
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - currency-exchange-net
+
+  mx-bank-ms-currency-exchange:
+    image: mx-bank-ms-currency-exchange:1.0.0
+    build:
+      context: ../mx-ms-currency-exchange
+      dockerfile: Dockerfile
+    container_name: mx-bank-ms-currency-exchange
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/mx-bank-ms-currency-exchange.properties:/app/config/mx-bank-ms-currency-exchange.properties
+    environment:
+      SPRING_CONFIG_LOCATION: file:/app/config/mx-bank-ms-currency-exchange.properties
+    depends_on:
+      - mx-bank-currency-exchange-mysql
+      - mx-bank-currency-exchange-rabbitmq
+    networks:
+      - currency-exchange-net
+  
+  mx-bank-wkr-currency-exchange:
+    image: mx-bank-wkr-currency-exchange:1.0.0
+    build:
+      context: ../mx-wkr-currency-exchange
+      dockerfile: Dockerfile
+    container_name: mx-bank-wkr-currency-exchange
+    volumes:
+      - ./config/mx-bank-wkr-currency-exchange.properties:/app/config/mx-bank-wkr-currency-exchange.properties
+    environment:
+      SPRING_CONFIG_LOCATION: file:/app/config/mx-bank-wkr-currency-exchange.properties
+    depends_on:
+      - mx-bank-currency-exchange-mysql
+      - mx-bank-currency-exchange-rabbitmq
+      - mx-bank-ms-currency-exchange
+    networks:
+      - currency-exchange-net
+
+volumes:
+  mysql-data:
+  rabbitmq-data:
+
+networks:
+  currency-exchange-net:
+    driver: bridge
